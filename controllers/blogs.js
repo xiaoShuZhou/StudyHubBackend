@@ -3,6 +3,9 @@ const Blog = require('../models/blog')
 const User = require('../models/user')
 const jwt = require('jsonwebtoken')
 const blog = require('../models/blog')
+const cloudinary = require('../utils/cloudinary')
+const multer = require('multer')
+const upload = multer({ dest: 'uploads/' })
 
 blogsRouter.get('/', async (request, response) => {
   const blogs = await Blog.find({}).populate('user', { username: 1, name: 1 })
@@ -29,34 +32,32 @@ blogsRouter.get('/user/:id', async (request, response) => {
 })
 
 
-blogsRouter.post('/', async (request, response) => {
+blogsRouter.post('/', upload.single('image'), async (request, response) => {
   const body = request.body
-  // request.token is from tokenExtractor in middleware.js
   const decodedToken = jwt.verify(request.token, process.env.SECRET)
+
   if (!decodedToken.id) {
     return response.status(401).json({ error: 'token invalid' })
   }
 
-  if (!body.likes) {
-    body.likes = 0
-  }
-
-  if (!body.title || !body.url) {
+  if (!body.title) {
     return response.status(400).end()
   }
 
-  // the decodedToken is user Object in login.js
-  //  const userForToken = {
-  //  username: user.username,
-  //  id: user._id
-
   const user = await User.findById(decodedToken.id)
+
+  // Upload the file to Cloudinary
+  let imageUrl = ''
+  if (request.file) {
+    const result = await cloudinary.uploader.upload(request.file.path)
+    imageUrl = result.secure_url
+  }
 
   const blog = new Blog({
     title: body.title,
-    author: body.author,
-    url: body.url,
-    likes: body.likes,
+    author: user.username,
+    content: body.content,
+    imageurl: imageUrl,
     user : user.id
   })
 

@@ -6,10 +6,13 @@ const blogSchema = new mongoose.Schema({
   url: String,
   likes: Number,
   imageurl: String,
+  content: String,
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   }
+}, {
+  timestamps: true,  // This is the option for Mongoose to manage createdAt and updatedAt fields
 })
 
 blogSchema.set('toJSON', {
