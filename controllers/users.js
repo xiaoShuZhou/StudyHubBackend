@@ -28,6 +28,4 @@ usersRouter.post('/', async (request, response) => {
 
 })
 
-
-
 module.exports = usersRouter

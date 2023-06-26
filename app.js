@@ -8,7 +8,6 @@ const blogsRouter = require('./controllers/blogs')
 const mongoose = require('mongoose')
 const usersRouter = require('./controllers/users')
 const loginRouter = require('./controllers/login')
-const imagesRouter = require('./controllers/images')
 const middleware = require('./utils/middleware')
 
 mongoose
@@ -29,6 +28,5 @@ app.use(middleware.tokenExtractor)
 app.use('/api/blogs', blogsRouter)
 app.use('/api/users', usersRouter)
 app.use('/api/login', loginRouter)
-app.use('/api/images', imagesRouter)
 
 module.exports = app

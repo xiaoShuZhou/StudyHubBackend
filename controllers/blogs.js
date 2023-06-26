@@ -55,10 +55,10 @@ blogsRouter.post('/', upload.single('image'), async (request, response) => {
 
   const blog = new Blog({
     title: body.title,
-    author: user.username,
+    author: user.name,
     content: body.content,
     imageurl: imageUrl,
-    user : user.id
+    user : user._id
   })
 
   const savedBlog = await blog.save()
