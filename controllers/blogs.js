@@ -84,18 +84,40 @@ blogsRouter.delete('/:id', async (request, response) => {
   response.status(204).end()
 })
 
-// updating the information of an individual blog post.The application mostly needs to update the number of likes for a blog post
-blogsRouter.put('/:id', async (request, response) => {
+
+blogsRouter.put('/:id', upload.single('image'), async (request, response) => {
   const body = request.body
-  const blog = {
-    title: body.title,
-    author: body.author,
-    url: body.url,
-    likes: body.likes
+  const decodedToken = jwt.verify(request.token, process.env.SECRET)
+
+  if (!decodedToken.id) {
+    return response.status(401).json({ error: 'token invalid' })
   }
 
-  const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, blog, { new: true })
-  response.json(updatedBlog)
+  const blog = await Blog.findById(request.params.id)
+
+  if (!blog){
+    return response.status(404).end()
+  }
+
+  if (blog.user.toString() !== decodedToken.id.toString()) {
+    return response.status(401).json({ error: 'token invalid' })
+  }
+
+  let imageUrl = blog.imageurl
+  if (request.file) {
+    const result = await cloudinary.uploader.upload(request.file.path)
+    imageUrl = result.secure_url
+  }
+
+  const updatedBlog = {
+    title: body.title || blog.title,
+    content: body.content || blog.content,
+    imageurl: imageUrl,
+    user: blog.user
+  }
+
+  const savedBlog = await Blog.findByIdAndUpdate(request.params.id, updatedBlog, { new: true })
+  response.json(savedBlog)
 })
 
 
