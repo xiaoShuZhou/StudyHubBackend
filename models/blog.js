@@ -13,6 +13,20 @@ const blogSchema = new mongoose.Schema({
   timestamps: true,  // This is the option for Mongoose to manage createdAt and updatedAt fields
 })
 
+blogSchema.index({
+  'title': 'text',
+  'author': 'text',
+  'content': 'text'
+}, {
+  weights: {
+    title: 5,
+    author: 3,
+    content: 1
+  },
+  name: 'SearchIndex'
+})
+
+
 blogSchema.set('toJSON', {
   transform: (document, returnedObject) => {
     returnedObject.id = returnedObject._id.toString()
